@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Kasir - E-KASIR JATIM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body class="bg-slate-100 pb-20">
+    <div class="bg-blue-700 text-white p-6 rounded-b-3xl shadow-lg mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-bold text-xl" id="displayKasir">Memuat...</h2>
+                <select id="kategoriOutlet" class="bg-blue-800 text-xs mt-1 border-none rounded p-1">
+                    <option value="Sekolah">Unit Produksi SMK</option>
+                    <option value="Alumni">UMKM Alumni</option>
+                </select>
+            </div>
+            <div class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-black">LIVE</div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 space-y-4">
+        <div id="reader" class="rounded-3xl overflow-hidden shadow-md border-4 border-white"></div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-200">
+            <h3 class="font-bold border-b pb-2 mb-4 text-gray-700">🛒 Keranjang Belanja</h3>
+            <div id="cartList" class="space-y-3 min-h-[100px]"></div>
+            <div class="border-t-2 border-dashed mt-4 pt-4 flex justify-between items-center">
+                <span class="text-gray-500 font-bold">TOTAL</span>
+                <span id="totalTxt" class="text-2xl font-black text-blue-600">Rp 0</span>
+            </div>
+            <button onclick="bayarSekarang()" class="w-full mt-6 bg-green-500 text-white py-4 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition">SIMPAN TRANSAKSI</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
+  authDomain: "e-kasir-jatim.firebaseapp.com",
+  databaseURL: "https://e-kasir-jatim-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "e-kasir-jatim",
+  storageBucket: "e-kasir-jatim.firebasestorage.app",
+  messagingSenderId: "1076293688355",
+  appId: "1:1076293688355:web:b0afc6e2f22cf6a419e596",
+  measurementId: "G-G25ZCGK4YS"};
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let keranjang = [];
+        let totalHarga = 0;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) document.getElementById('displayKasir').innerText = user.email.split('@')[0].toUpperCase();
+            else window.location.href = "login.html";
+        });
+
+        // Scan Logic
+        const scanner = new Html5Qrcode("reader");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (txt) => {
+            const snapshot = await get(ref(db, `produk/${txt}`));
+            if(snapshot.exists()) {
+                const p = snapshot.val();
+                keranjang.push(p);
+                updateUI();
+                alert("Ditambahkan: " + p.nama);
+            }
+        });
+
+        function updateUI() {
+            const list = document.getElementById('cartList');
+            list.innerHTML = "";
+            totalHarga = 0;
+            keranjang.forEach(i => {
+                totalHarga += i.harga;
+                list.innerHTML += `<div class="flex justify-between text-sm font-medium"><span>${i.nama}</span><span>Rp ${i.harga.toLocaleString()}</span></div>`;
+            });
+            document.getElementById('totalTxt').innerText = "Rp " + totalHarga.toLocaleString();
+        }
+
+        window.bayarSekarang = () => {
+            if(keranjang.length === 0) return;
+            const tgl = new Date();
+            const outlet = document.getElementById('kategoriOutlet').value;
+            const path = `penjualan/${outlet}/${tgl.getFullYear()}/${tgl.getMonth()+1}/${tgl.getDate()}`;
+            
+            const data = {
+                kasir: auth.currentUser.email,
+                total: totalHarga,
+                waktu: tgl.toLocaleTimeString()
+            };
+
+            push(ref(db, path), data).then(() => {
+                alert("Berhasil! Transaksi tercatat di folder " + outlet);
+                keranjang = [];
+                updateUI();
+            });
+        };
+    </script>
+</body>
+</html>

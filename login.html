@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - E-KASIR JATIM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-slate-900 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-yellow-500">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black text-blue-900">E-KASIR JATIM</h1>
+            <p class="text-sm text-gray-500 font-semibold tracking-widest">EDUKASI • INOVASI • MANDIRI</p>
+        </div>
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="Email (admin@guru.com / siswa@sekolah.com)" class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+            <input type="password" id="password" placeholder="Password" class="w-full p-4 bg-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+            <button onclick="prosesLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-all transform hover:scale-105">MASUK SISTEM</button>
+        </div>
+        <p class="mt-6 text-center text-xs text-gray-400 font-medium italic">Program Pendukung Vokasi SMK & UMKM Jatim</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { 
+           apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
+  authDomain: "e-kasir-jatim.firebaseapp.com",
+  databaseURL: "https://e-kasir-jatim-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "e-kasir-jatim",
+  storageBucket: "e-kasir-jatim.firebasestorage.app",
+  messagingSenderId: "1076293688355",
+  appId: "1:1076293688355:web:b0afc6e2f22cf6a419e596",
+  measurementId: "G-G25ZCGK4YS"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.prosesLogin = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, pass)
+                .then((user) => {
+                    if(email.includes('admin')) {
+                        window.location.href = "dashboard_admin.html";
+                    } else {
+                        window.location.href = "kasir.html";
+                    }
+                })
+                .catch((err) => alert("Akun tidak terdaftar atau password salah!"));
+        };
+    </script>
+</body>
+</html>
