@@ -3,43 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal Kasir - E-KASIR JATIM</title>
+    <title>Kasir Pintar - E-KASIR JATIM</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-slate-100 pb-20">
-    <div class="bg-blue-700 text-white p-6 rounded-b-3xl shadow-lg mb-6">
-        <div class="flex justify-between items-center">
+<body class="bg-slate-100 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-blue-600 text-white p-4 shadow-lg flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img id="headerLogo" src="" class="w-10 h-10 object-contain bg-white rounded-lg hidden">
             <div>
-                <h2 class="font-bold text-xl" id="displayKasir">Memuat...</h2>
-                <select id="kategoriOutlet" class="bg-blue-800 text-xs mt-1 border-none rounded p-1">
-                    <option value="Sekolah">Unit Produksi SMK</option>
-                    <option value="Alumni">UMKM Alumni</option>
-                </select>
+                <h1 id="headerStoreName" class="font-extrabold leading-none text-lg uppercase tracking-tighter">E-KASIR JATIM</h1>
+                <p id="headerStoreAddress" class="text-[9px] opacity-80 uppercase tracking-widest">Memuat Lokasi...</p>
             </div>
-            <div class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-black">LIVE</div>
         </div>
-    </div>
+        <div class="text-right">
+            <div id="clock" class="text-xs font-bold bg-blue-700 px-3 py-1 rounded-full">00:00:00</div>
+            <p class="text-[9px] mt-1 uppercase font-black opacity-70">Kasir: Siswa SMK</p>
+        </div>
+    </header>
 
-    <div class="max-w-md mx-auto px-4 space-y-4">
-        <div id="reader" class="rounded-3xl overflow-hidden shadow-md border-4 border-white"></div>
-
-        <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-200">
-            <h3 class="font-bold border-b pb-2 mb-4 text-gray-700">🛒 Keranjang Belanja</h3>
-            <div id="cartList" class="space-y-3 min-h-[100px]"></div>
-            <div class="border-t-2 border-dashed mt-4 pt-4 flex justify-between items-center">
-                <span class="text-gray-500 font-bold">TOTAL</span>
-                <span id="totalTxt" class="text-2xl font-black text-blue-600">Rp 0</span>
+    <main class="flex-1 flex overflow-hidden">
+        <section class="flex-1 p-4 overflow-y-auto hide-scrollbar">
+            <div class="mb-4">
+                <input type="text" id="searchBox" placeholder="Cari nama produk atau scan barcode..." class="w-full p-4 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium">
             </div>
-            <button onclick="bayarSekarang()" class="w-full mt-6 bg-green-500 text-white py-4 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition">SIMPAN TRANSAKSI</button>
+            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                </div>
+        </section>
+
+        <aside class="w-96 bg-white shadow-2xl flex flex-col border-l border-slate-200">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="font-black text-slate-800 uppercase tracking-tighter">Keranjang Belanja</h2>
+                <span id="badgeCount" class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-full font-bold">0 ITEM</span>
+            </div>
+
+            <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar">
+                </div>
+
+            <div class="p-6 bg-slate-50 border-t space-y-3">
+                <div class="flex justify-between text-slate-500 text-sm font-bold">
+                    <span>Subtotal</span>
+                    <span id="subtotal">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-blue-600 text-2xl font-black italic">
+                    <span>TOTAL</span>
+                    <span id="totalHarga">Rp 0</span>
+                </div>
+                <button onclick="openPaymentModal()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95">
+                    BAYAR SEKARANG (F8)
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div class="p-8 text-center bg-blue-600 text-white">
+                <p class="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Total Tagihan</p>
+                <h3 id="modalTotal" class="text-4xl font-black italic">Rp 0</h3>
+            </div>
+            <div class="p-8 space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Uang Tunai (Rp)</label>
+                    <input type="number" id="inputBayar" class="w-full p-4 bg-slate-100 border-none rounded-2xl text-2xl font-black text-slate-800 outline-none focus:ring-4 focus:ring-blue-100 transition" placeholder="0" oninput="hitungKembalian()">
+                </div>
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-sm font-bold text-slate-500 uppercase">Kembalian</span>
+                    <span id="txtKembalian" class="text-2xl font-black text-green-600">Rp 0</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="finishOrder('thermal')" class="bg-slate-800 text-white p-4 rounded-2xl flex flex-col items-center gap-1 hover:bg-slate-700 transition">
+                        <i class="fas fa-print"></i> <span class="text-[9px] font-bold uppercase">Thermal</span>
+                    </button>
+                    <button onclick="finishOrder('pdf')" class="bg-slate-800 text-white p-4 rounded-2xl flex flex-col items-center gap-1 hover:bg-slate-700 transition">
+                        <i class="fas fa-file-pdf"></i> <span class="text-[9px] font-bold uppercase">PDF A4</span>
+                    </button>
+                    <button onclick="finishOrder('whatsapp')" class="bg-green-600 text-white p-4 rounded-2xl flex flex-col items-center gap-1 hover:bg-green-700 transition">
+                        <i class="fab fa-whatsapp"></i> <span class="text-[9px] font-bold uppercase">WhatsApp</span>
+                    </button>
+                </div>
+                <button onclick="closeModal()" class="w-full py-2 text-slate-400 text-xs font-bold uppercase tracking-widest">Batal / Kembali</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, set, push, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIG FIREBASE
         const firebaseConfig = {apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
   authDomain: "e-kasir-jatim.firebaseapp.com",
   databaseURL: "https://e-kasir-jatim-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -50,57 +109,240 @@
   measurementId: "G-G25ZCGK4YS"};
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const auth = getAuth(app);
 
-        let keranjang = [];
-        let totalHarga = 0;
+        let masterProduk = {};
+        let cart = [];
+        let infoToko = { nama: "E-KASIR", alamat: "Jawa Timur", footer: "Terima Kasih", logo: "" };
+        let currentAntrean = 0;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) document.getElementById('displayKasir').innerText = user.email.split('@')[0].toUpperCase();
-            else window.location.href = "login.html";
-        });
-
-        // Scan Logic
-        const scanner = new Html5Qrcode("reader");
-        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (txt) => {
-            const snapshot = await get(ref(db, `produk/${txt}`));
-            if(snapshot.exists()) {
-                const p = snapshot.val();
-                keranjang.push(p);
-                updateUI();
-                alert("Ditambahkan: " + p.nama);
+        // 1. AMBIL DATA TOKO & ANTREAN DARI FIREBASE (REAL-TIME)
+        onValue(ref(db, 'settings/toko'), (snap) => {
+            const s = snap.val();
+            if(s) {
+                infoToko = s;
+                document.getElementById('headerStoreName').innerText = s.nama;
+                document.getElementById('headerStoreAddress').innerText = s.alamat;
+                if(s.logo) {
+                    document.getElementById('headerLogo').src = s.logo;
+                    document.getElementById('headerLogo').classList.remove('hidden');
+                }
             }
         });
 
-        function updateUI() {
-            const list = document.getElementById('cartList');
-            list.innerHTML = "";
-            totalHarga = 0;
-            keranjang.forEach(i => {
-                totalHarga += i.harga;
-                list.innerHTML += `<div class="flex justify-between text-sm font-medium"><span>${i.nama}</span><span>Rp ${i.harga.toLocaleString()}</span></div>`;
-            });
-            document.getElementById('totalTxt').innerText = "Rp " + totalHarga.toLocaleString();
-        }
+        onValue(ref(db, 'settings/antrean_saat_ini'), (snap) => {
+            currentAntrean = snap.val() || 0;
+        });
 
-        window.bayarSekarang = () => {
-            if(keranjang.length === 0) return;
-            const tgl = new Date();
-            const outlet = document.getElementById('kategoriOutlet').value;
-            const path = `penjualan/${outlet}/${tgl.getFullYear()}/${tgl.getMonth()+1}/${tgl.getDate()}`;
-            
-            const data = {
-                kasir: auth.currentUser.email,
-                total: totalHarga,
-                waktu: tgl.toLocaleTimeString()
+        // 2. AMBIL DATA PRODUK
+        onValue(ref(db, 'produk'), (snap) => {
+            masterProduk = snap.val() || {};
+            renderProducts();
+        });
+
+        const renderProducts = () => {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = "";
+            for(let id in masterProduk) {
+                const p = masterProduk[id];
+                grid.innerHTML += `
+                    <div onclick="addToCart('${id}')" class="bg-white p-4 rounded-[2rem] shadow-sm border border-transparent hover:border-blue-500 transition-all cursor-pointer group">
+                        <div class="h-24 bg-slate-50 rounded-2xl mb-3 flex items-center justify-center text-slate-300 group-hover:bg-blue-50 transition">
+                            <i class="fas fa-box text-3xl"></i>
+                        </div>
+                        <h4 class="font-black text-slate-800 text-sm leading-tight">${p.nama}</h4>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-blue-600 font-bold text-xs">Rp ${p.harga.toLocaleString()}</span>
+                            <span class="text-[9px] bg-slate-100 px-2 py-1 rounded-md text-slate-400 font-black">STOK: ${p.stok}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // 3. LOGIKA KERANJANG (EDIT & HAPUS)
+        window.addToCart = (id) => {
+            const exist = cart.find(item => item.id === id);
+            if(exist) {
+                if(exist.qty >= masterProduk[id].stok) return alert("Stok tidak mencukupi!");
+                exist.qty++;
+            } else {
+                cart.push({ ...masterProduk[id], id: id, qty: 1 });
+            }
+            renderCart();
+        };
+
+        window.updateQty = (id, change) => {
+            const item = cart.find(i => i.id === id);
+            if(item) {
+                item.qty += change;
+                if(item.qty <= 0) cart = cart.filter(i => i.id !== id);
+                if(item.qty > masterProduk[id].stok) {
+                    item.qty = masterProduk[id].stok;
+                    alert("Mencapai batas stok!");
+                }
+                renderCart();
+            }
+        };
+
+        const renderCart = () => {
+            const container = document.getElementById('cartItems');
+            container.innerHTML = "";
+            let total = 0;
+            cart.forEach(item => {
+                total += item.harga * item.qty;
+                container.innerHTML += `
+                    <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center border border-slate-100">
+                        <div class="flex-1">
+                            <h5 class="font-bold text-slate-700 text-xs">${item.nama}</h5>
+                            <p class="text-[10px] text-slate-400 font-bold">@Rp ${item.harga.toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white px-3 py-2 rounded-xl shadow-sm">
+                            <button onclick="updateQty('${item.id}', -1)" class="text-red-500 font-black px-1"><i class="fas fa-minus-circle"></i></button>
+                            <span class="font-black text-sm w-4 text-center">${item.qty}</span>
+                            <button onclick="updateQty('${item.id}', 1)" class="text-blue-600 font-black px-1"><i class="fas fa-plus-circle"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('totalHarga').innerText = `Rp ${total.toLocaleString()}`;
+            document.getElementById('subtotal').innerText = `Rp ${total.toLocaleString()}`;
+            document.getElementById('badgeCount').innerText = `${cart.length} ITEM`;
+        };
+
+        // 4. PEMBAYARAN & CETAK
+        window.openPaymentModal = () => {
+            if(cart.length === 0) return alert("Keranjang masih kosong!");
+            const total = cart.reduce((acc, i) => acc + (i.harga * i.qty), 0);
+            document.getElementById('modalTotal').innerText = `Rp ${total.toLocaleString()}`;
+            document.getElementById('paymentModal').classList.remove('hidden');
+            document.getElementById('inputBayar').focus();
+        };
+
+        window.closeModal = () => document.getElementById('paymentModal').classList.add('hidden');
+
+        window.hitungKembalian = () => {
+            const total = cart.reduce((acc, i) => acc + (i.harga * i.qty), 0);
+            const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
+            const kembali = bayar - total;
+            document.getElementById('txtKembalian').innerText = `Rp ${kembali < 0 ? 0 : kembali.toLocaleString()}`;
+        };
+
+        window.finishOrder = async (type) => {
+            const total = cart.reduce((acc, i) => acc + (i.harga * i.qty), 0);
+            const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
+            if(bayar < total) return alert("Uang pembayaran kurang!");
+
+            const newAntrean = currentAntrean + 1;
+            const now = new Date();
+            const trxId = "TRX-" + Date.now();
+            const jam = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+            const tgl = now.toLocaleDateString('id-ID');
+
+            const dataTrx = {
+                id: trxId,
+                items: [...cart],
+                total: total,
+                bayar: bayar,
+                kembali: bayar - total,
+                tanggal: tgl,
+                waktu: jam,
+                antrean: newAntrean,
+                kasir: "Siswa SMK"
             };
 
-            push(ref(db, path), data).then(() => {
-                alert("Berhasil! Transaksi tercatat di folder " + outlet);
-                keranjang = [];
-                updateUI();
-            });
+            // Simpan Cloud
+            await set(ref(db, 'settings/antrean_saat_ini'), newAntrean);
+            await push(ref(db, 'transaksi'), dataTrx);
+
+            // Potong Stok
+            for(let item of cart) {
+                await update(ref(db, `produk/${item.id}`), { stok: masterProduk[item.id].stok - item.qty });
+            }
+
+            // Aksi Cetak
+            if(type === 'thermal') printThermal(dataTrx);
+            if(type === 'pdf') printPDFA4(dataTrx);
+            if(type === 'whatsapp') sendWA(dataTrx);
+
+            alert("Transaksi Berhasil!");
+            cart = [];
+            renderCart();
+            closeModal();
         };
+
+        // --- FUNGSI OUTPUT ---
+
+        const printThermal = (d) => {
+            const p = window.open('', '', 'width=300,height=600');
+            p.document.write(`
+                <style>@page { size: 58mm auto; margin: 0; }</style>
+                <div style="font-family:monospace; width:50mm; padding:5mm; font-size:11px;">
+                    <center>
+                        ${infoToko.logo ? `<img src="${infoToko.logo}" style="width:40px;"><br>` : ''}
+                        <b>${infoToko.nama.toUpperCase()}</b><br>
+                        ${infoToko.alamat}<br>
+                        ---------------------------<br>
+                    </center>
+                    Tgl : ${d.tanggal} ${d.waktu}<br>
+                    No  : ${d.id.substring(0,10)}<br>
+                    Ksr : ${d.kasir}<br>
+                    ---------------------------<br>
+                    ${d.items.map(i => `${i.nama.substring(0,20)}<br>${i.qty} x ${i.harga.toLocaleString()} = ${(i.harga*i.qty).toLocaleString()}`).join('<br>')}
+                    <br>---------------------------<br>
+                    <div style="text-align:right">
+                        <b>TOTAL: Rp ${d.total.toLocaleString()}</b><br>
+                        Tunai: Rp ${d.bayar.toLocaleString()}<br>
+                        Kembali: Rp ${d.kembali.toLocaleString()}<br>
+                    </div>
+                    ---------------------------<br>
+                    <center>
+                        <div style="font-size:16px; font-weight:bold;">ANTREAN: #${d.antrean}</div>
+                        <br>${infoToko.footer}
+                    </center>
+                </div>
+            `);
+            p.print(); p.close();
+        };
+
+        const printPDFA4 = (d) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(20); doc.text(infoToko.nama, 105, 20, {align:'center'});
+            doc.setFontSize(10); doc.text(infoToko.alamat, 105, 25, {align:'center'});
+            doc.line(20, 30, 190, 30);
+            doc.text(`ID Transaksi: ${d.id}`, 20, 40);
+            doc.text(`Waktu: ${d.tanggal} ${d.waktu}`, 20, 45);
+            doc.text(`Nomor Antrean: ${d.antrean}`, 190, 40, {align:'right'});
+            
+            let y = 60;
+            doc.text("Item", 20, y); doc.text("Qty", 100, y); doc.text("Total", 190, y, {align:'right'});
+            doc.line(20, y+2, 190, y+2);
+            d.items.forEach(i => {
+                y += 10;
+                doc.text(i.nama, 20, y); doc.text(i.qty.toString(), 100, y); doc.text((i.harga*i.qty).toLocaleString(), 190, y, {align:'right'});
+            });
+            doc.line(20, y+5, 190, y+5);
+            doc.setFontSize(14); doc.text(`TOTAL: Rp ${d.total.toLocaleString()}`, 190, y+15, {align:'right'});
+            doc.setFontSize(10); doc.text(infoToko.footer, 105, y+30, {align:'center'});
+            doc.save(`Struk_${d.id}.pdf`);
+        };
+
+        const sendWA = (d) => {
+            let msg = `*${infoToko.nama}*%0A${infoToko.alamat}%0A%0A`;
+            msg += `No Antrean: *#${d.antrean}*%0A`;
+            msg += `---------------------------%0A`;
+            d.items.forEach(i => msg += `${i.nama} x${i.qty} = ${(i.harga*i.qty).toLocaleString()}%0A`);
+            msg += `---------------------------%0A`;
+            msg += `*TOTAL: Rp ${d.total.toLocaleString()}*%0A`;
+            msg += `Tunai: Rp ${d.bayar.toLocaleString()}%0A`;
+            msg += `Kembali: Rp ${d.kembali.toLocaleString()}%0A%0A`;
+            msg += `_${infoToko.footer}_`;
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        };
+
+        // Jam Realtime
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
     </script>
 </body>
 </html>
