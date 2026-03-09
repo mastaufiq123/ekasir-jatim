@@ -3,71 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin Fixed - E-KASIR JATIM 2026</title>
+    <title>Master Admin - E-KASIR JATIM 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .active-link { background: #1e40af !important; color: white !important; }
+        .active-link { background: #1e40af !important; color: white !important; box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3); }
         .tab-content { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
 
-    <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-30">
-        <div class="p-6 text-center border-b border-slate-800">
-            <h1 class="text-xl font-black italic text-blue-400">ADMIN PRO</h1>
+    <aside class="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-30">
+        <div class="p-8 text-center border-b border-slate-800">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-lg">
+                <i class="fas fa-user-shield text-3xl text-white"></i>
+            </div>
+            <h1 class="text-xl font-black tracking-tighter italic text-white uppercase">E-KASIR <span class="text-blue-400">JATIM</span></h1>
+            <p class="text-[9px] text-slate-400 font-bold tracking-[0.2em] uppercase mt-1">Siswa SMK Mandiri</p>
         </div>
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="mainNav">
-            <button onclick="switchTab('dash')" id="btn-dash" class="nav-link active-link w-full flex items-center p-3 rounded-xl transition-all"><i class="fas fa-chart-pie w-8"></i> Dashboard</button>
-            <button onclick="switchTab('prod')" id="btn-prod" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-boxes w-8"></i> Stok Produk</button>
-            <button onclick="switchTab('trx')" id="btn-trx" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-history w-8"></i> Riwayat Trx</button>
-            <button onclick="switchTab('lapor')" id="btn-lapor" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-file-invoice-dollar w-8"></i> Laporan Detail</button>
-            <button onclick="switchTab('user')" id="btn-user" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-users-cog w-8"></i> Pengguna</button>
-            <button onclick="switchTab('toko')" id="btn-toko" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-store w-8"></i> Branding Struk</button>
-            <button onclick="switchTab('cert')" id="btn-cert" class="nav-link w-full flex items-center p-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-all"><i class="fas fa-award w-8"></i> Sertifikat</button>
+        
+        <nav class="flex-1 p-5 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('dash')" id="btn-dash" class="nav-link active-link w-full flex items-center p-4 rounded-2xl transition-all">
+                <i class="fas fa-chart-line w-8"></i> Dashboard
+            </button>
+            <button onclick="switchTab('prod')" id="btn-prod" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 rounded-2xl transition-all">
+                <i class="fas fa-box-open w-8"></i> Stok Produk
+            </button>
+            <button onclick="switchTab('trx')" id="btn-trx" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 rounded-2xl transition-all">
+                <i class="fas fa-history w-8"></i> Riwayat Trx
+            </button>
+            <button onclick="switchTab('user')" id="btn-user" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 rounded-2xl transition-all">
+                <i class="fas fa-users-cog w-8"></i> Pengguna
+            </button>
+            <button onclick="switchTab('toko')" id="btn-toko" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 rounded-2xl transition-all">
+                <i class="fas fa-store w-8"></i> Branding Struk
+            </button>
+            <button onclick="switchTab('cert')" id="btn-cert" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 rounded-2xl transition-all">
+                <i class="fas fa-award w-8"></i> Sertifikat
+            </button>
         </nav>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="bg-white border-b p-4 flex justify-between items-center px-10 shadow-sm">
-            <h2 id="page-title" class="font-black uppercase text-blue-600">Dashboard</h2>
-            <div id="clock" class="font-mono font-bold text-slate-400">00:00:00</div>
+        <header class="bg-white border-b p-6 flex justify-between items-center px-10">
+            <h2 id="page-title" class="text-lg font-black text-slate-800 uppercase tracking-tight">Dashboard Utama</h2>
+            <div id="clock" class="text-lg font-mono font-black text-slate-400">00:00:00</div>
         </header>
 
-        <section class="flex-1 p-8 overflow-y-auto">
+        <section class="flex-1 p-10 overflow-y-auto">
             
-            <div id="tab-dash" class="tab-content space-y-6">
+            <div id="tab-dash" class="tab-content space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border-l-4 border-blue-600">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Total Omzet</p>
-                        <h3 id="dash-omzet" class="text-2xl font-black">Rp 0</h3>
+                    <div class="bg-white p-8 rounded-[2rem] border-l-8 border-l-blue-600 shadow-sm">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Omzet</p>
+                        <h3 class="text-3xl font-black" id="dash-omzet">Rp 0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border-l-4 border-green-600">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Transaksi</p>
-                        <h3 id="dash-trx" class="text-2xl font-black">0</h3>
+                    <div class="bg-white p-8 rounded-[2rem] border-l-8 border-l-green-600 shadow-sm">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Transaksi</p>
+                        <h3 class="text-3xl font-black" id="dash-trx">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border-l-4 border-orange-600">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Stok Menipis</p>
-                        <h3 id="dash-limit" class="text-2xl font-black">0</h3>
+                    <div class="bg-white p-8 rounded-[2rem] border-l-8 border-l-orange-600 shadow-sm">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Stok Limit</p>
+                        <h3 class="text-3xl font-black" id="dash-limit">0</h3>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border h-80">
+                <div class="bg-white p-8 rounded-[2.5rem] border h-96">
                     <canvas id="salesChart"></canvas>
                 </div>
             </div>
 
             <div id="tab-prod" class="tab-content hidden space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-black text-lg">Manajemen Barang</h3>
+                <div class="flex justify-between items-center bg-white p-6 rounded-3xl border shadow-sm">
+                    <h3 class="font-black">Manajemen Stok</h3>
                     <button onclick="document.getElementById('modalProduk').classList.remove('hidden')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-xs font-black">+ TAMBAH BARANG</button>
                 </div>
-                <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+                <div class="bg-white rounded-3xl border overflow-hidden">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400">
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase">
                             <tr><th class="p-4">Kode</th><th class="p-4">Nama</th><th class="p-4">Beli</th><th class="p-4">Jual</th><th class="p-4">Stok</th><th class="p-4">Aksi</th></tr>
                         </thead>
                         <tbody id="listProduk" class="text-sm divide-y"></tbody>
@@ -75,72 +90,70 @@
                 </div>
             </div>
 
-            <div id="tab-trx" class="tab-content hidden space-y-4">
-                <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <div id="tab-trx" class="tab-content hidden">
+                <div class="bg-white rounded-3xl border overflow-hidden">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase">
-                            <tr><th class="p-4">Waktu</th><th class="p-4">ID Transaksi</th><th class="p-4 text-right">Total</th><th class="p-4 text-center">Status</th><th class="p-4 text-center">Aksi</th></tr>
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase">
+                            <tr><th class="p-4">Tanggal</th><th class="p-4">ID Transaksi</th><th class="p-4 text-right">Total</th><th class="p-4 text-center">Status</th></tr>
                         </thead>
                         <tbody id="listHistory" class="text-sm divide-y"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="tab-toko" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border">
-                        <h3 class="font-black mb-4">Identitas Toko</h3>
-                        <div class="space-y-3">
-                            <div class="text-center">
-                                <img id="previewLogo" src="" class="w-16 h-16 mx-auto object-contain border rounded-lg bg-slate-50">
-                                <input type="file" id="inputLogo" class="hidden" onchange="previewImg(event, 'previewLogo')">
-                                <button onclick="document.getElementById('inputLogo').click()" class="text-[10px] text-blue-600 font-bold mt-1">UPLOAD LOGO</button>
-                            </div>
-                            <input type="text" id="storeName" placeholder="Nama Toko" class="w-full p-3 bg-slate-50 rounded-xl border outline-none">
-                            <input type="text" id="storeAddress" placeholder="Alamat" class="w-full p-3 bg-slate-50 rounded-xl border outline-none">
-                            <input type="text" id="storePhone" placeholder="No HP/WA" class="w-full p-3 bg-slate-50 rounded-xl border outline-none">
-                            <textarea id="storeFooter" placeholder="Catatan Bawah Struk" class="w-full p-3 bg-slate-50 rounded-xl border outline-none"></textarea>
-                            <button onclick="saveStore()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black">SIMPAN IDENTITAS</button>
-                        </div>
-                    </div>
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border">
-                        <h3 class="font-black mb-4">Pengaturan Tampilan</h3>
-                        <div class="space-y-4 font-bold text-slate-600">
-                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl"><input type="checkbox" id="showLogo"> Tampilkan Logo</label>
-                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl"><input type="checkbox" id="showAddress"> Tampilkan Alamat</label>
-                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl"><input type="checkbox" id="showPhone"> Tampilkan No Telepon</label>
-                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl"><input type="checkbox" id="showKasir"> Tampilkan Nama Kasir</label>
-                            <button onclick="saveStore()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-black mt-4">SIMPAN TAMPILAN</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-user" class="tab-content hidden space-y-4">
-                <div class="bg-white p-6 rounded-3xl border flex justify-between items-center">
+            <div id="tab-user" class="tab-content hidden">
+                <div class="bg-white p-6 rounded-3xl border mb-4 flex justify-between items-center">
                     <h3 class="font-black">Kelola Akun</h3>
                     <button onclick="document.getElementById('modalUser').classList.remove('hidden')" class="bg-orange-500 text-white px-6 py-2 rounded-xl text-xs font-black">+ AKUN BARU</button>
                 </div>
                 <div class="bg-white rounded-3xl border overflow-hidden">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400"><tr><th class="p-4">Username</th><th class="p-4">Password</th><th class="p-4">Role</th><th class="p-4">Aksi</th></tr></thead>
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase"><tr><th class="p-4">Username</th><th class="p-4">Password</th><th class="p-4">Role</th><th class="p-4">Aksi</th></tr></thead>
                         <tbody id="listUser" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="tab-cert" class="tab-content hidden space-y-6">
-                <div class="bg-white p-10 rounded-3xl shadow-sm border max-w-2xl mx-auto text-center">
-                    <h3 class="font-black text-xl mb-6">Pengaturan Sertifikat</h3>
-                    <div class="space-y-4 text-left">
-                        <div class="text-center mb-4">
-                            <img id="previewCertLogo" src="" class="w-20 h-20 mx-auto object-contain border rounded-lg bg-slate-50">
-                            <input type="file" id="inputCertLogo" class="hidden" onchange="previewImg(event, 'previewCertLogo')">
-                            <button onclick="document.getElementById('inputCertLogo').click()" class="text-[10px] text-blue-600 font-bold mt-1 uppercase">Upload Logo Sertifikat</button>
+            <div id="tab-toko" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-8 rounded-[2.5rem] border">
+                    <h3 class="font-black mb-6">Identitas Toko</h3>
+                    <div class="space-y-4">
+                        <div class="text-center bg-slate-50 p-4 rounded-3xl border-2 border-dashed">
+                            <img id="previewLogo" src="" class="w-20 h-20 mx-auto object-contain mb-2">
+                            <input type="file" id="inputLogo" class="hidden" onchange="previewImg(event, 'previewLogo')">
+                            <button onclick="document.getElementById('inputLogo').click()" class="text-[10px] font-black text-blue-600 uppercase">Ganti Logo</button>
                         </div>
-                        <input type="text" id="certName" placeholder="Nama Kasir/Siswa" class="w-full p-4 bg-slate-50 rounded-2xl border">
-                        <input type="text" id="certPeriod" placeholder="Masa Kerja (Contoh: 3 Bulan)" class="w-full p-4 bg-slate-50 rounded-2xl border">
-                        <button onclick="generateCertA4()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl">CETAK SERTIFIKAT A4 (.PDF)</button>
+                        <input type="text" id="storeName" placeholder="Nama Toko" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                        <input type="text" id="storeAddress" placeholder="Alamat" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                        <input type="text" id="storePhone" placeholder="No. Telp" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                        <textarea id="storeFooter" placeholder="Catatan Bawah Struk" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></textarea>
+                        <button onclick="saveStore()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black">SIMPAN IDENTITAS</button>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-[2.5rem] border">
+                    <h3 class="font-black mb-6">Visibilitas Struk</h3>
+                    <div class="space-y-4 font-bold">
+                        <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="showLogo"> Tampilkan Logo</label>
+                        <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="showAddress"> Tampilkan Alamat</label>
+                        <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="showPhone"> Tampilkan No. HP</label>
+                        <label class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer"><input type="checkbox" id="showKasir"> Tampilkan Nama Kasir</label>
+                        <button onclick="resetQueue()" class="w-full bg-red-100 text-red-600 py-4 rounded-2xl font-black mt-4">RESET ANTREAN KE #1</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-cert" class="tab-content hidden">
+                <div class="bg-white p-10 rounded-[2.5rem] border max-w-xl mx-auto">
+                    <h3 class="font-black text-xl text-center mb-6">Cetak Sertifikat Kasir</h3>
+                    <div class="space-y-4">
+                        <div class="text-center bg-slate-50 p-6 rounded-3xl border-2 border-dashed mb-4">
+                            <img id="previewCertLogo" src="" class="w-24 h-24 mx-auto object-contain mb-2">
+                            <input type="file" id="inputCertLogo" class="hidden" onchange="previewImg(event, 'previewCertLogo')">
+                            <button onclick="document.getElementById('inputCertLogo').click()" class="text-[10px] font-black text-blue-600 uppercase">Logo Sertifikat (Opsional)</button>
+                        </div>
+                        <input type="text" id="certName" placeholder="Nama Lengkap Siswa" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                        <input type="text" id="certPeriod" placeholder="Keterangan (Contoh: Lulus Uji Kompetensi)" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none">
+                        <button onclick="generateCert()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl uppercase">Download Sertifikat (PDF)</button>
                     </div>
                 </div>
             </div>
@@ -149,37 +162,37 @@
     </main>
 
     <div id="modalProduk" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
-            <h3 class="font-black text-xl mb-6">Form Barang</h3>
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8">
+            <h3 class="font-black text-xl mb-6 tracking-tight">Tambah Barang</h3>
             <div class="space-y-4">
-                <input type="text" id="p-id" placeholder="Kode Barang / Barcode" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none font-bold">
-                <input type="text" id="p-nama" placeholder="Nama Produk" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
+                <input type="text" id="p-id" placeholder="Kode Barang" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold">
+                <input type="text" id="p-nama" placeholder="Nama Barang" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="p-beli" placeholder="Harga Beli" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                    <input type="number" id="p-jual" placeholder="Harga Jual" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
+                    <input type="number" id="p-beli" placeholder="Hrg Beli" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
+                    <input type="number" id="p-jual" placeholder="Hrg Jual" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
                 </div>
-                <input type="number" id="p-stok" placeholder="Jumlah Stok" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                <div class="flex gap-2 pt-4">
+                <input type="number" id="p-stok" placeholder="Stok" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
+                <div class="flex gap-2">
                     <button onclick="saveProduk()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black">SIMPAN</button>
-                    <button onclick="document.getElementById('modalProduk').classList.add('hidden')" class="bg-slate-200 px-6 rounded-2xl font-black text-slate-500">BATAL</button>
+                    <button onclick="document.getElementById('modalProduk').classList.add('hidden')" class="px-6 bg-slate-200 rounded-2xl font-bold">BATAL</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="modalUser" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
-            <h3 class="font-black text-xl mb-6">Tambah Pengguna</h3>
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8">
+            <h3 class="font-black text-xl mb-6">Tambah Akun</h3>
             <div class="space-y-4">
-                <input type="text" id="u-user" placeholder="Username" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                <input type="text" id="u-pass" placeholder="Password" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none">
-                <select id="u-role" class="w-full p-4 bg-slate-100 rounded-2xl border-none outline-none font-bold">
+                <input type="text" id="u-user" placeholder="Username" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
+                <input type="text" id="u-pass" placeholder="Password" class="w-full p-4 bg-slate-100 rounded-2xl outline-none">
+                <select id="u-role" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold">
                     <option value="kasir">KASIR</option>
                     <option value="admin">ADMIN</option>
                 </select>
-                <div class="flex gap-2 pt-4">
+                <div class="flex gap-2">
                     <button onclick="saveUser()" class="flex-1 bg-orange-600 text-white py-4 rounded-2xl font-black">BUAT AKUN</button>
-                    <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="bg-slate-200 px-6 rounded-2xl font-black text-slate-500">BATAL</button>
+                    <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="px-6 bg-slate-200 rounded-2xl font-bold">BATAL</button>
                 </div>
             </div>
         </div>
@@ -187,28 +200,32 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { 
-  apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
+        // GANTI DENGAN FIREBASE CONFIG ANDA
+        const firebaseConfig = {  apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
   authDomain: "e-kasir-jatim.firebaseapp.com",
   databaseURL: "https://e-kasir-jatim-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "e-kasir-jatim",
   storageBucket: "e-kasir-jatim.firebasestorage.app",
   messagingSenderId: "1076293688355",
   appId: "1:1076293688355:web:b0afc6e2f22cf6a419e596",
-  measurementId: "G-G25ZCGK4YS"
-        };
+  measurementId: "G-G25ZCGK4YS"};
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL LOGIC ---
+        // UI & CLOCK
         window.switchTab = (name) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active-link', 'text-slate-400'));
+            const tabs = ['dash', 'prod', 'trx', 'user', 'toko', 'cert'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                const btn = document.getElementById('btn-' + t);
+                if(el) el.classList.add('hidden');
+                if(btn) btn.classList.remove('active-link');
+            });
             document.getElementById('tab-' + name).classList.remove('hidden');
             document.getElementById('btn-' + name).classList.add('active-link');
-            document.getElementById('page-title').innerText = name;
+            document.getElementById('page-title').innerText = name.toUpperCase();
         };
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
@@ -218,51 +235,33 @@
             reader.readAsDataURL(e.target.files[0]);
         };
 
-        // --- MANAJEMEN PRODUK ---
+        // FIREBASE LOGIC
         window.saveProduk = () => {
             const id = document.getElementById('p-id').value;
-            if(!id) return alert("Isi Kode Barang!");
-            const data = {
+            if(!id) return alert("ID Kosong!");
+            set(ref(db, 'produk/' + id), {
                 nama: document.getElementById('p-nama').value,
                 beli: parseInt(document.getElementById('p-beli').value) || 0,
                 harga: parseInt(document.getElementById('p-jual').value) || 0,
                 stok: parseInt(document.getElementById('p-stok').value) || 0
-            };
-            set(ref(db, 'produk/' + id), data).then(() => {
-                alert("Data Tersimpan!");
-                document.getElementById('modalProduk').classList.add('hidden');
-            }).catch(e => alert("Error: " + e));
+            }).then(() => { alert("Tersimpan!"); document.getElementById('modalProduk').classList.add('hidden'); });
         };
 
         onValue(ref(db, 'produk'), (snap) => {
-            const list = document.getElementById('listProduk');
-            let menipis = 0; list.innerHTML = "";
+            const list = document.getElementById('listProduk'); list.innerHTML = "";
+            let menipis = 0;
             snap.forEach(c => {
                 const p = c.val();
                 if(p.stok <= 5) menipis++;
-                list.innerHTML += `<tr>
-                    <td class="p-4 font-mono font-bold text-blue-600">${c.key}</td>
-                    <td class="p-4 font-bold">${p.nama}</td>
-                    <td class="p-4">Rp ${p.beli.toLocaleString()}</td>
-                    <td class="p-4 font-black">Rp ${p.harga.toLocaleString()}</td>
-                    <td class="p-4"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg">${p.stok}</span></td>
-                    <td class="p-4"><button onclick="remove(ref(db, 'produk/${c.key}'))" class="text-red-500"><i class="fas fa-trash"></i></button></td>
-                </tr>`;
+                list.innerHTML += `<tr><td class="p-4 font-bold text-blue-600">${c.key}</td><td class="p-4 font-bold">${p.nama}</td><td class="p-4">Rp ${p.beli.toLocaleString()}</td><td class="p-4 font-black">Rp ${p.harga.toLocaleString()}</td><td class="p-4">${p.stok}</td><td class="p-4"><button onclick="remove(ref(db, 'produk/${c.key}'))" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;
             });
             document.getElementById('dash-limit').innerText = menipis;
         });
 
-        // --- MANAJEMEN USER ---
         window.saveUser = () => {
             const u = document.getElementById('u-user').value;
-            if(!u) return alert("Username kosong!");
-            set(ref(db, 'users/' + u), {
-                pass: document.getElementById('u-pass').value,
-                role: document.getElementById('u-role').value
-            }).then(() => {
-                alert("User Dibuat!");
-                document.getElementById('modalUser').classList.add('hidden');
-            });
+            set(ref(db, 'users/' + u), { pass: document.getElementById('u-pass').value, role: document.getElementById('u-role').value })
+            .then(() => { alert("User Dibuat!"); document.getElementById('modalUser').classList.add('hidden'); });
         };
 
         onValue(ref(db, 'users'), (snap) => {
@@ -273,9 +272,8 @@
             });
         });
 
-        // --- BRANDING TOKO ---
         window.saveStore = () => {
-            const settings = {
+            const data = {
                 nama: document.getElementById('storeName').value,
                 alamat: document.getElementById('storeAddress').value,
                 telp: document.getElementById('storePhone').value,
@@ -287,72 +285,51 @@
                 showPhone: document.getElementById('showPhone').checked,
                 showKasir: document.getElementById('showKasir').checked
             };
-            set(ref(db, 'settings/toko'), settings).then(() => alert("✅ Sinkronisasi Berhasil!"));
+            set(ref(db, 'settings/toko'), data).then(() => alert("Pengaturan Sinkron!"));
         };
 
         onValue(ref(db, 'settings/toko'), (snap) => {
-            const s = snap.val();
-            if(s) {
-                document.getElementById('storeName').value = s.nama || "";
-                document.getElementById('storeAddress').value = s.alamat || "";
-                document.getElementById('storePhone').value = s.telp || "";
-                document.getElementById('storeFooter').value = s.footer || "";
-                document.getElementById('previewLogo').src = s.logo || "";
-                document.getElementById('previewCertLogo').src = s.certLogo || "";
-                document.getElementById('showLogo').checked = s.showLogo;
-                document.getElementById('showAddress').checked = s.showAddress;
-                document.getElementById('showPhone').checked = s.showPhone;
-                document.getElementById('showKasir').checked = s.showKasir;
-            }
+            const s = snap.val(); if(!s) return;
+            document.getElementById('storeName').value = s.nama || "";
+            document.getElementById('storeAddress').value = s.alamat || "";
+            document.getElementById('storePhone').value = s.telp || "";
+            document.getElementById('storeFooter').value = s.footer || "";
+            document.getElementById('previewLogo').src = s.logo || "";
+            document.getElementById('previewCertLogo').src = s.certLogo || "";
+            document.getElementById('showLogo').checked = s.showLogo || false;
+            document.getElementById('showAddress').checked = s.showAddress || false;
+            document.getElementById('showPhone').checked = s.showPhone || false;
+            document.getElementById('showKasir').checked = s.showKasir || false;
         });
 
-        // --- RIWAYAT & CHART ---
         onValue(ref(db, 'transaksi'), (snap) => {
-            let total = 0; let count = 0; const list = document.getElementById('listHistory');
-            list.innerHTML = "";
+            const list = document.getElementById('listHistory'); list.innerHTML = "";
+            let total = 0; let count = 0;
             snap.forEach(c => {
                 const t = c.val(); total += t.total; count++;
-                list.innerHTML += `<tr><td class="p-4">${t.tanggal}</td><td class="p-4 font-bold">${t.id.substring(0,12)}</td><td class="p-4 text-right font-black">Rp ${t.total.toLocaleString()}</td><td class="p-4 text-center"><span class="bg-green-100 text-green-600 px-2 py-1 rounded-md text-[10px] font-black uppercase">LUNAS</span></td><td class="p-4 text-center"><button onclick="remove(ref(db, 'transaksi/${c.key}'))" class="text-red-400 text-xs italic underline">Hapus</button></td></tr>`;
+                list.innerHTML += `<tr><td class="p-4">${t.tanggal}</td><td class="p-4 font-bold">${t.id.substring(0,10)}</td><td class="p-4 text-right font-black">Rp ${t.total.toLocaleString()}</td><td class="p-4 text-center"><span class="bg-green-100 text-green-600 px-2 py-1 rounded text-[10px] font-black uppercase">LUNAS</span></td></tr>`;
             });
             document.getElementById('dash-omzet').innerText = `Rp ${total.toLocaleString()}`;
             document.getElementById('dash-trx').innerText = count;
-            renderChart();
         });
 
-        const renderChart = () => {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if(window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: ['Hari 1', 'Hari 2', 'Hari 3', 'Hari 4'], datasets: [{ label: 'Omzet', data: [100000, 250000, 150000, 400000], borderColor: '#1e40af', tension: 0.4 }] },
-                options: { maintainAspectRatio: false }
-            });
-        };
-
-        // --- SERTIFIKAT A4 ---
-        window.generateCertA4 = () => {
+        window.generateCert = () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
+            const nama = document.getElementById('certName').value || "KASIR TERBAIK";
             const logo = document.getElementById('previewCertLogo').src;
-            const nama = document.getElementById('certName').value || "Nama Kasir";
-            const toko = document.getElementById('storeName').value;
-
+            
             doc.setFillColor(30, 41, 59); doc.rect(0, 0, 297, 20, 'F');
-            if(logo && logo.length > 50) doc.addImage(logo, 'PNG', 135, 30, 25, 25);
-            
-            doc.setFont("times", "bold"); doc.setFontSize(30);
-            doc.text("SERTIFIKAT KOMPETENSI KASIR", 148, 75, { align: "center" });
-            doc.setFontSize(16); doc.setFont("helvetica", "normal");
-            doc.text("Diberikan kepada personil terbaik:", 148, 90, { align: "center" });
-            doc.setFontSize(28); doc.text(nama.toUpperCase(), 148, 110, { align: "center" });
-            doc.setFontSize(14); doc.text(`Telah bekerja di ${toko} dengan performa Sangat Baik.`, 148, 125, { align: "center" });
-            
-            doc.save(`Sertifikat_${nama}.pdf`);
+            if(logo.length > 50) doc.addImage(logo, 'PNG', 135, 30, 25, 25);
+            doc.setFont("times", "bold"); doc.setFontSize(30); doc.text("SERTIFIKAT KOMPETENSI KASIR", 148, 75, {align:'center'});
+            doc.setFontSize(26); doc.text(nama.toUpperCase(), 148, 110, {align:'center'});
+            doc.setFontSize(14); doc.setFont("helvetica", "normal");
+            doc.text(document.getElementById('certPeriod').value || "Lulus Uji Kompetensi", 148, 125, {align:'center'});
+            doc.save(`Cert_${nama}.pdf`);
         };
 
-        window.resetQueue = () => {
-            set(ref(db, 'settings/antrean_saat_ini'), 0).then(() => alert("Antrean dimulai dari 1 lagi!"));
-        };
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, { type: 'line', data: { labels: ['H-3', 'H-2', 'H-1', 'Hari Ini'], datasets: [{ label: 'Sales', data: [100, 300, 200, 500], borderColor: '#1e40af', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
     </script>
 </body>
 </html>
