@@ -3,92 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - E-KASIR JATIM</title>
+    <title>Master Admin - E-KASIR JATIM 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .active-link { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white !important; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
+        .tab-content { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-gray-100 flex min-h-screen">
-    <aside class="w-64 bg-blue-900 text-white p-8 space-y-8 hidden md:block">
-        <h1 class="text-2xl font-black italic">ADMIN PANEL</h1>
-        <nav class="space-y-4 font-bold text-blue-200">
-            <button onclick="showSection('inv')" class="block hover:text-white">📦 Master Barang</button>
-            <button onclick="showSection('rep')" class="block hover:text-white">📈 Laporan Multi-Outlet</button>
-            <button onclick="showSection('cert')" class="block hover:text-white">🎓 Sertifikat Siswa</button>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-30">
+        <div class="p-8 text-center border-b border-slate-800">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <i class="fas fa-user-shield text-3xl text-white"></i>
+            </div>
+            <h1 class="text-xl font-black tracking-tighter italic">E-KASIR <span class="text-blue-400">JATIM</span></h1>
+            <p class="text-[9px] text-slate-400 font-bold tracking-[0.3em] uppercase mt-1">Siswa SMK Mandiri</p>
+        </div>
+        
+        <nav class="flex-1 p-5 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('dash')" id="btn-dash" class="nav-link active-link w-full flex items-center p-4 rounded-2xl transition-all group">
+                <i class="fas fa-chart-line w-8 text-lg"></i> Dashboard
+            </button>
+            <button onclick="switchTab('prod')" id="btn-prod" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 hover:text-white rounded-2xl transition-all">
+                <i class="fas fa-box-open w-8"></i> Produk & Stok
+            </button>
+            <button onclick="switchTab('trx')" id="btn-trx" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 hover:text-white rounded-2xl transition-all">
+                <i class="fas fa-history w-8"></i> Riwayat Trx
+            </button>
+            <button onclick="switchTab('cert')" id="btn-cert" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 hover:text-white rounded-2xl transition-all">
+                <i class="fas fa-award w-8 text-yellow-400"></i> Sertifikat Kasir
+            </button>
+            <button onclick="switchTab('toko')" id="btn-toko" class="nav-link w-full flex items-center p-4 text-slate-400 hover:bg-slate-800 hover:text-white rounded-2xl transition-all">
+                <i class="fas fa-store w-8 text-blue-400"></i> Branding Struk
+            </button>
         </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="location.href='index.html'" class="w-full p-4 bg-red-500/10 text-red-500 rounded-2xl text-xs font-black hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-power-off"></i> LOGOUT SISTEM
+            </button>
+        </div>
     </aside>
 
-    <main class="flex-1 p-10">
-        <div id="rep" class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black text-gray-800 tracking-tighter">DATA TRANSAKSI REAL-TIME</h2>
-                <button onclick="exportKeExcel()" class="bg-green-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg">📥 EXCEL REPORT</button>
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b p-6 flex justify-between items-center px-10 shadow-sm z-10">
+            <div>
+                <h2 id="page-title" class="text-xl font-black text-slate-800 tracking-tight uppercase">Dashboard Utama</h2>
+                <p id="storeStatus" class="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">Memuat data toko...</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right border-r pr-6 border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">Status Sistem</p>
+                    <p class="text-xs font-bold text-green-500 flex items-center justify-end gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Cloud Online
+                    </p>
+                </div>
+                <div id="clock" class="text-lg font-mono font-black text-slate-700 bg-slate-100 px-4 py-2 rounded-xl">00:00:00</div>
+            </div>
+        </header>
+
+        <section class="flex-1 p-10 overflow-y-auto">
+
+            <div id="tab-dash" class="tab-content space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Omzet Hari Ini</p>
+                        <h3 class="text-3xl font-black text-slate-800 mt-1" id="stat-omzet">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-blue-500 text-[10px] font-black uppercase">Total Antrean</p>
+                        <h3 class="text-3xl font-black text-slate-800 mt-1" id="stat-antrean">0</h3>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-orange-500 text-[10px] font-black uppercase">Stok Limit</p>
+                        <h3 class="text-3xl font-black text-orange-600 mt-1" id="stat-limit">0</h3>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-green-500 text-[10px] font-black uppercase">Akurasi Laporan</p>
+                        <h3 class="text-3xl font-black text-slate-800 mt-1">100%</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-[450px]">
+                    <h4 class="font-bold text-slate-700 mb-6 flex items-center gap-2"><i class="fas fa-chart-bar text-blue-500"></i> Grafik Penjualan Harian</h4>
+                    <canvas id="salesChart"></canvas>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-blue-500">
-                    <p class="text-gray-400 font-bold text-xs uppercase">Omzet Unit Produksi (Sekolah)</p>
-                    <h3 id="omzetSekolah" class="text-3xl font-black text-blue-900">Rp 0</h3>
-                </div>
-                <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-orange-500">
-                    <p class="text-gray-400 font-bold text-xs uppercase">Omzet UMKM Alumni</p>
-                    <h3 id="omzetAlumni" class="text-3xl font-black text-orange-600">Rp 0</h3>
-                </div>
-            </div>
-        </div>
+            <div id="tab-toko" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-black mb-8 text-slate-800 flex items-center gap-3"><i class="fas fa-image text-blue-500"></i> Branding UMKM</h3>
+                        <div class="space-y-6">
+                            <div class="flex flex-col items-center p-8 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+                                <img id="previewLogo" src="https://via.placeholder.com/100" class="w-24 h-24 object-contain mb-4 rounded-2xl bg-white shadow-sm border-4 border-white">
+                                <input type="file" id="inputLogo" accept="image/*" class="hidden" onchange="previewImage(event)">
+                                <button onclick="document.getElementById('inputLogo').click()" class="bg-slate-800 text-white px-6 py-2 rounded-xl text-[10px] font-black hover:bg-blue-600 transition uppercase tracking-widest">Update Logo Toko</button>
+                            </div>
+                            <div class="space-y-4">
+                                <input type="text" id="storeName" placeholder="Nama Toko UMKM..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                <input type="text" id="storeAddress" placeholder="Alamat & Kontak..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                <textarea id="storeFooter" rows="2" placeholder="Catatan Bawah Struk (Contoh: Barang yg sudah dibeli tidak dapat ditukar)..." class="w-full p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm italic outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button onclick="saveStoreSettings()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-save"></i> SIMPAN PENGATURAN STRUK
+                            </button>
+                        </div>
+                    </div>
 
-        <div id="cert" class="mt-12 bg-blue-50 p-8 rounded-3xl border-2 border-dashed border-blue-300">
-            <h3 class="font-black text-xl text-blue-900 mb-4">🎓 Generator Sertifikat Kompetensi Siswa</h3>
-            <p class="text-sm text-blue-700 mb-6 font-medium leading-relaxed">Fitur ini merangkum total jam kerja dan transaksi yang dilakukan siswa selama praktik kasir sebagai Portofolio Lulusan SMK.</p>
-            <div class="flex gap-4">
-                <input type="email" id="emailSiswa" placeholder="Email Siswa" class="flex-1 p-4 rounded-2xl border-none shadow-sm">
-                <button onclick="generatePortofolio()" class="bg-blue-900 text-white px-8 py-4 rounded-2xl font-bold">CETAK PORTOFOLIO</button>
+                    <div class="bg-red-50 p-10 rounded-[2.5rem] border border-red-100">
+                        <h3 class="text-lg font-black mb-4 text-red-700 flex items-center gap-3"><i class="fas fa-tools"></i> Kontrol Operasional</h3>
+                        <p class="text-xs text-red-500 mb-8 font-medium">Gunakan fitur ini setiap pagi untuk mereset antrean harian agar dimulai dari nomor 1 kembali.</p>
+                        
+                        <div class="bg-white p-6 rounded-3xl border border-red-100 text-center">
+                            <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Antrean Saat Ini</p>
+                            <div id="currentQueueNum" class="text-5xl font-black text-red-600 mb-6">0</div>
+                            <button onclick="resetQueue()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black hover:bg-red-700 transition-all shadow-lg shadow-red-100 flex items-center justify-center gap-2">
+                                <i class="fas fa-redo-alt"></i> RESET ANTREAN KE #1
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <div id="tab-cert" class="tab-content hidden">
+                <div class="bg-white p-12 rounded-[3rem] shadow-xl border border-slate-100 max-w-4xl mx-auto text-center">
+                    <div class="w-24 h-24 bg-yellow-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg shadow-yellow-200">
+                        <i class="fas fa-award text-5xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-800">Sertifikat Kompetensi Kasir Digital</h3>
+                    <p class="text-slate-500 text-sm mb-12">Diberikan kepada personil kasir berdasarkan integrasi data laporan tanpa selisih.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left mb-12">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Nama Lengkap Kasir</label>
+                            <input type="text" id="kasirName" value="Siswa SMK Mandiri" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Masa Kerja / Durasi</label>
+                            <input type="text" id="kasirDuration" value="1 Semester (Jan - Jun 2026)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-[10px] font-black text-green-500 uppercase ml-2">Predikat & Evaluasi Penjualan</label>
+                            <select id="kasirGrade" class="w-full p-4 bg-green-50 text-green-700 rounded-2xl font-black border-none outline-none appearance-none">
+                                <option value="Sangat Memuaskan (Tanpa Selisih)">Sangat Memuaskan (Tanpa Selisih)</option>
+                                <option value="Memuaskan">Memuaskan</option>
+                                <option value="Baik">Baik</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="generateA4Certificate()" class="bg-slate-900 text-white px-12 py-5 rounded-2xl font-black shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-3 mx-auto uppercase tracking-widest text-xs">
+                        <i class="fas fa-file-pdf text-xl"></i> Cetak Sertifikat A4
+                    </button>
+                </div>
+            </div>
+
+            <div id="tab-trx" class="tab-content hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border">
+                    <h3 class="font-black text-slate-800">Log Transaksi Real-Time</h3>
+                    <button onclick="exportExcel()" class="bg-green-600 text-white px-6 py-2 rounded-xl text-[10px] font-black hover:bg-green-700 transition">EXPORT EXCEL (.XLSX)</button>
+                </div>
+                <div class="bg-white rounded-[2rem] shadow-sm border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                            <tr>
+                                <th class="p-6">Waktu</th>
+                                <th class="p-6">ID Transaksi</th>
+                                <th class="p-6">Antrean</th>
+                                <th class="p-6 text-right">Total</th>
+                                <th class="p-6 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listTrx" class="text-sm divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
+        // GANTI DENGAN FIREBASE CONFIG ANDA
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxE_Obnz5ajGPLb1mOWROjE07klq_wfXo",
   authDomain: "e-kasir-jatim.firebaseapp.com",
   databaseURL: "https://e-kasir-jatim-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "e-kasir-jatim",
   storageBucket: "e-kasir-jatim.firebasestorage.app",
   messagingSenderId: "1076293688355",
   appId: "1:1076293688355:web:b0afc6e2f22cf6a419e596",
-  measurementId: "G-G25ZCGK4YS"};
+  measurementId: "G-G25ZCGK4YS"
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Pantau Omzet Multi-Outlet
-        const tgl = new Date();
-        const pathBase = `${tgl.getFullYear()}/${tgl.getMonth()+1}/${tgl.getDate()}`;
-
-        onValue(ref(db, `penjualan/Sekolah/${pathBase}`), (snap) => {
-            let total = 0;
-            snap.forEach(c => total += c.val().total);
-            document.getElementById('omzetSekolah').innerText = "Rp " + total.toLocaleString();
-        });
-
-        onValue(ref(db, `penjualan/Alumni/${pathBase}`), (snap) => {
-            let total = 0;
-            snap.forEach(c => total += c.val().total);
-            document.getElementById('omzetAlumni').innerText = "Rp " + total.toLocaleString();
-        });
-
-        // Fitur Export Excel
-        window.exportKeExcel = () => {
-            // Logika Excel (Sama dengan kode sebelumnya)
-            alert("Menyiapkan file Excel Laporan Multi-Outlet...");
+        // UI & CLOCK LOGIC
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        window.switchTab = (name) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active-link', 'text-white'));
+            document.getElementById('tab-' + name).classList.remove('hidden');
+            document.getElementById('btn-' + name).classList.add('active-link');
+            document.getElementById('page-title').innerText = document.getElementById('btn-' + name).innerText.trim();
         };
 
-        // Fitur Sertifikat Portofolio
-        window.generatePortofolio = () => {
-            const email = document.getElementById('emailSiswa').value;
-            alert("Sistem sedang merangkum data transaksi " + email + " sebagai syarat Sertifikat Kompetensi.");
-            window.print(); // Mode print sederhana untuk demo lomba
+        // BRANDING LOGIC
+        window.previewImage = (e) => {
+            const reader = new FileReader();
+            reader.onload = () => { document.getElementById('previewLogo').src = reader.result; };
+            reader.readAsDataURL(e.target.files[0]);
         };
+
+        window.saveStoreSettings = () => {
+            const data = {
+                nama: document.getElementById('storeName').value,
+                alamat: document.getElementById('storeAddress').value,
+                footer: document.getElementById('storeFooter').value,
+                logo: document.getElementById('previewLogo').src
+            };
+            set(ref(db, 'settings/toko'), data).then(() => alert("🚀 Branding Berhasil Disinkronkan!"));
+        };
+
+        onValue(ref(db, 'settings/toko'), (snap) => {
+            const s = snap.val();
+            if(s) {
+                document.getElementById('storeName').value = s.nama || "";
+                document.getElementById('storeAddress').value = s.alamat || "";
+                document.getElementById('storeFooter').value = s.footer || "";
+                document.getElementById('previewLogo').src = s.logo || "https://via.placeholder.com/100";
+                document.getElementById('storeStatus').innerText = `Branding: ${s.nama}`;
+            }
+        });
+
+        // QUEUE LOGIC
+        onValue(ref(db, 'settings/antrean_saat_ini'), (snap) => {
+            const q = snap.val() || 0;
+            document.getElementById('stat-antrean').innerText = q;
+            document.getElementById('currentQueueNum').innerText = q;
+        });
+
+        window.resetQueue = () => {
+            if(confirm("Reset nomor antrean ke 1 untuk hari ini?")) {
+                set(ref(db, 'settings/antrean_saat_ini'), 0);
+            }
+        };
+
+        // TRANSACTION & STATS LOGIC
+        onValue(ref(db, 'transaksi'), (snap) => {
+            let omzet = 0;
+            const container = document.getElementById('listTrx');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const t = child.val();
+                omzet += t.total;
+                container.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-6 font-mono text-xs text-slate-500">${t.tanggal} ${t.waktu}</td>
+                        <td class="p-6 font-bold text-slate-700">${t.id.substring(0,12)}...</td>
+                        <td class="p-6"><span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg font-black text-xs">#${t.antrean}</span></td>
+                        <td class="p-6 text-right font-black text-slate-800">Rp ${t.total.toLocaleString()}</td>
+                        <td class="p-6 text-center">
+                            <button onclick="alert('Detail: ${t.items.map(i=>i.nama).join(', ')}')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-eye"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-omzet').innerText = `Rp ${omzet.toLocaleString()}`;
+        });
+
+        // SERTIFIKAT A4 GENERATOR
+        window.generateA4Certificate = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+            const kName = document.getElementById('kasirName').value;
+            const kDuration = document.getElementById('kasirDuration').value;
+            const kGrade = document.getElementById('kasirGrade').value;
+            const sName = document.getElementById('storeName').value || "Unit Produksi SMK";
+
+            // Border Elegant
+            doc.setDrawColor(30, 41, 59);
+            doc.setLineWidth(1);
+            doc.rect(5, 5, 287, 200);
+            doc.rect(7, 7, 283, 196);
+
+            // Header Background
+            doc.setFillColor(30, 41, 59);
+            doc.rect(7, 7, 283, 30, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont("times", "bold");
+            doc.text("SERTIFIKAT KOMPETENSI KASIR DIGITAL", 148, 27, { align: "center" });
+
+            // Body
+            doc.setTextColor(30, 41, 59);
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "normal");
+            doc.text("Diberikan Dengan Hormat Kepada:", 148, 65, { align: "center" });
+
+            doc.setFontSize(32);
+            doc.setFont("times", "bolditalic");
+            doc.text(kName.toUpperCase(), 148, 85, { align: "center" });
+
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Atas dedikasi, integritas, dan profesionalisme kerja pada ${sName}`, 148, 105, { align: "center" });
+            doc.text(`dalam periode masa tugas: ${kDuration}`, 148, 115, { align: "center" });
+
+            // Stats Result
+            doc.setFillColor(241, 245, 249);
+            doc.rect(50, 130, 197, 25, 'F');
+            doc.setFont("helvetica", "bold");
+            doc.text(`EVALUASI SISTEM: ${kGrade}`, 148, 146, { align: "center" });
+
+            // Signatures
+            doc.setFontSize(11);
+            doc.text("Direktur Unit Produksi SMK", 60, 175);
+            doc.text("__________________________", 60, 185);
+            doc.text("Admin System E-Kasir", 237, 175, { align: "center" });
+            doc.text("__________________________", 237, 185, { align: "center" });
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text("Dokumen ini diterbitkan secara digital melalui Sistem E-Kasir Jatim 2026", 148, 205, { align: "center" });
+
+            doc.save(`Sertifikat_${kName}.pdf`);
+            alert("Sertifikat A4 Berhasil Dibuat!");
+        };
+
+        // EXCEL EXPORT
+        window.exportExcel = () => {
+            onValue(ref(db, 'transaksi'), (snap) => {
+                const rows = [];
+                snap.forEach(c => {
+                    const t = c.val();
+                    rows.push({ ID: t.id, Tanggal: t.tanggal, Waktu: t.waktu, Antrean: t.antrean, Total: t.total });
+                });
+                const ws = XLSX.utils.json_to_sheet(rows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan_Penjualan");
+                XLSX.writeFile(wb, `Laporan_Kasir_${Date.now()}.xlsx`);
+            }, { onlyOnce: true });
+        };
+
+        // DUMMY CHART
+        const ctx = document.getElementById('salesChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                datasets: [{
+                    label: 'Trend Penjualan (Rp)',
+                    data: [150000, 230000, 180000, 450000, 320000, 600000, 550000],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true, tension: 0.4, borderWidth: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
     </script>
 </body>
 </html>
